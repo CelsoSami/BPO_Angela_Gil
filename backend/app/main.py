@@ -144,12 +144,43 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # ---------------------------------------------------------------------------
 # Erros amigáveis (nunca expor tracebacks/SQL)
 # ---------------------------------------------------------------------------
-from sqlalchemy.exc import IntegrityError, StatementError  # noqa: E402
+from sqlalchemy.exc import (  # noqa: E402
+    IntegrityError,
+    OperationalError,
+    ProgrammingError,
+    StatementError,
+)
+
+
+@app.exception_handler(ProgrammingError)
+async def programming_error_handler(request: Request, exc: ProgrammingError):
+    """Tabela/relação inexistente — quase sempre schema.sql não executado."""
+    logger.warning("Erro de banco (tabela ausente?) em %s %s: %s", request.method, request.url, exc)
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": "Banco de dados não configurado corretamente. Verifique se o schema.sql foi executado e tente novamente."
+        },
+    )
+
+
+@app.exception_handler(OperationalError)
+async def operational_error_handler(request: Request, exc: OperationalError):
+    logger.warning("Banco indisponível em %s %s: %s", request.method, request.url, exc)
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "Banco de dados indisponível no momento. Tente novamente em instantes."},
+    )
 
 
 @app.exception_handler(StatementError)
 async def statement_error_handler(request: Request, exc: StatementError):
-    logger.warning("Parâmetro inválido em %s %s: %s", request.method, request.url.path, exc)
+    logger.warning(
+        "Parâmetro inválido em %s %s: %s",
+        request.method,
+        request.url,
+        exc,
+    )
     return JSONResponse(
         status_code=400,
         content={"detail": "Identificador ou parâmetro inválido na requisição."},
