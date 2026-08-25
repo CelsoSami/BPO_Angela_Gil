@@ -72,10 +72,38 @@ def _bootstrap_admin() -> None:
         db.close()
 
 
+def _seed_demo_if_requested() -> None:
+    """Popula dados demonstrativos no 1º boot quando SEED_DEMO_ON_STARTUP=true."""
+    if not settings.seed_demo_on_startup:
+        return
+    from app.database.session import get_session_local
+    from app.models.clients import Client
+
+    try:
+        db = get_session_local()()
+    except Exception as exc:
+        logger.warning("Seed de demonstração ignorado: %s", exc)
+        return
+    try:
+        existe = db.query(Client.id).first()
+        if existe:
+            return
+        from app.services.seed import run_seed
+
+        n = run_seed(db)
+        logger.info("Dados demonstrativos criados (%s statements).", n)
+    except Exception as exc:
+        db.rollback()
+        logger.error("Falha ao popular dados demonstrativos: %s", exc)
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
     _bootstrap_admin()
+    _seed_demo_if_requested()
     yield
 
 

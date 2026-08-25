@@ -99,20 +99,12 @@ def _split_sql(texto: str) -> list[str]:
 
 
 def cmd_seed_demo() -> None:
-    from sqlalchemy import text
-
     db = _get_db()
-    caminho = BACKEND_DIR.parent / "database" / "seed.sql"
-    if not caminho.exists():
-        print("Arquivo database/seed.sql não encontrado.")
-        sys.exit(1)
-    sql = caminho.read_text(encoding="utf-8")
-    statements = _split_sql(sql)
     try:
-        for stmt in statements:
-            db.execute(text(stmt))
-        db.commit()
-        print(f"Seed executado com sucesso ({len(statements)} statements).")
+        from app.services.seed import run_seed
+
+        n = run_seed(db)
+        print(f"Seed executado com sucesso ({n} statements).")
     except Exception as exc:
         db.rollback()
         print(f"Erro ao executar seed: {exc}")

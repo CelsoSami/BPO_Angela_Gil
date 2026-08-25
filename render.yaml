@@ -14,6 +14,11 @@ services:
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
+      # IMPORTANTE: fixa o Python 3.12 — o padrão 3.14 do Render não possui
+      # binários pré-compilados para psycopg2-binary e pydantic-core
+      # (o build a partir do código-fonte falha no ambiente do Render).
+      - key: PYTHON_VERSION
+        value: 3.12.7
       - key: ENVIRONMENT
         value: production
       - key: LOG_LEVEL
@@ -28,6 +33,11 @@ services:
         value: 720
       - key: PASSWORD_HASH_ALGORITHM
         value: argon2id
+      # Demonstração: no 1º boot cria o admin (ADMIN_PASSWORD) e popula dados
+      # fictícios automaticamente — sem precisar do Shell (que é pago).
+      # Em produção, mude para false e remova as credenciais abaixo.
+      - key: SEED_DEMO_ON_STARTUP
+        value: true
       # Gera um SECRET_KEY aleatório automaticamente no primeiro deploy
       - key: SECRET_KEY
         generateValue: true

@@ -205,24 +205,41 @@ git push -u origin main
 
 **3. Crie o serviço no Render** (você já está logado):
 - **New → Blueprint** → conecte seu GitHub → escolha o repositório.
-- O Render lê o `render.yaml` já incluído no projeto (Python, `rootDir: backend`,
-  build/start commands prontos) e cria o serviço automaticamente.
+- O Render lê o `render.yaml` já incluído no projeto (Python 3.12 fixado,
+  `rootDir: backend`, build/start commands prontos) e cria o serviço automaticamente.
+
+> **Por que Python 3.12?** O padrão do Render (3.14) não tem binários
+> pré-compilados para `psycopg2-binary` e `pydantic-core`; a compilação a partir
+> do código-fonte falha no ambiente de build. O `render.yaml` fixa
+> `PYTHON_VERSION=3.12.7`. Se já criou o serviço, adicione essa variável em
+> **Environment** e clique em **Deploy** (ou **Manual Deploy → Deploy latest commit**).
 
 **4. Preencha as variáveis de ambiente** no painel do serviço → **Environment**:
 - `DATABASE_URL` = `postgresql://postgres:SUA_SENHA_REAL@db.dummxpzffyeofphxbbzg.supabase.co:5432/postgres`
 - `ADMIN_PASSWORD` = senha inicial do admin (mín. 8 caracteres)
 - (`SECRET_KEY` é gerada automaticamente; `CORS_ORIGINS=*` em homologação)
 
-**5. Crie o administrador** — aba **Shell** do serviço no Render:
+**5. Nada de Shell (que é pago):** no **primeiro boot**, o próprio aplicativo:
+- cria o administrador usando `ADMIN_USERNAME`/`ADMIN_PASSWORD`; e
+- popula os dados demonstrativos (porque `SEED_DEMO_ON_STARTUP=true`).
 
-```bash
-python -m app.cli create-admin
-# ou, para popular dados de demonstração:  python -m app.cli seed-demo
-```
+Ou seja: **defina as variáveis → deploy → abra o app → login**.
+O Shell só seria necessário para manutenção avançada (e não é).
 
 **6. Abra o app**: `https://build-flow-bpo.onrender.com` e entre com
 `admin` + a senha definida. (No plano free, o serviço "dorme" após ~15 min de
 inatividade e o primeiro acesso demora ~50 s para acordar.)
+
+### Backup gratuito — Hugging Face Spaces (Docker)
+
+Se o Render não funcionar, o mesmo código sobe no **Hugging Face Spaces**
+(plano free) em poucos minutos, usando o `Dockerfile` da raiz:
+
+1. Crie um Space: **New Space** → nome → **SDK: Docker** → **Public**.
+2. Em **Settings → Variables and secrets**, adicione as mesmas variáveis
+   (`DATABASE_URL`, `ADMIN_PASSWORD`, `SEED_DEMO_ON_STARTUP=true`, …).
+3. Faça push do repositório para o Space. URL: `https://huggingface.co/spaces/SEU_USUARIO/NOME`.
+4. O espaço roda o `Dockerfile` automaticamente (a porta é lida de `$PORT=7860`).
 
 ### Opção A2 — Render / Railway / Fly.io (manual, sem blueprint)
 

@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     # Extração de documentos (Fase 1: regex). Fase 2 pode plugar OCR/IA aqui.
     document_extraction_engine: str = "regex"
 
+    # Demonstração: popula o banco com dados fictícios no 1º boot
+    # (executa database/seed.sql apenas quando a tabela de clientes está vazia).
+    seed_demo_on_startup: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:
