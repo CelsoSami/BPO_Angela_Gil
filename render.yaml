@@ -38,6 +38,10 @@ services:
       # Em produção, mude para false e remova as credenciais abaixo.
       - key: SEED_DEMO_ON_STARTUP
         value: true
+      # Cria as tabelas automaticamente no 1º boot se o banco estiver vazio
+      # (permite usar o Render Postgres free ou qualquer Postgres sem SQL Editor).
+      - key: SETUP_SCHEMA_ON_STARTUP
+        value: true
       # Gera um SECRET_KEY aleatório automaticamente no primeiro deploy
       - key: SECRET_KEY
         generateValue: true

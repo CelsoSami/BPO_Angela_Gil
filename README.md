@@ -249,6 +249,27 @@ Se o Render não funcionar, o mesmo código sobe no **Hugging Face Spaces**
 4. Crie o admin uma vez: `python -m app.cli create-admin`.
 5. Adicione um domínio customizado e ative HTTPS.
 
+### Opção A3 — Render Postgres free (tudo gratuito, sem SQL Editor)
+
+Se o Supabase estiver com restrição de IPv6 (host `db.*.supabase.co` resolve só para
+IPv6 e o Render não tem rota IPv6 → "Network is unreachable"), use o banco gratuito
+**do próprio Render** — mesma rede, sem esse problema:
+
+1. Render → **New → PostgreSQL** → plano **Free** (1 GB; expira em 30 dias — ideal
+   para apresentação/MVP).
+2. Copie a **Internal Database URL** do painel do Postgres.
+3. No Web Service → **Environment**, ajuste:
+   - `DATABASE_URL` = a URL interna do passo 2;
+   - `SETUP_SCHEMA_ON_STARTUP` = `true` (cria as tabelas no 1º boot);
+   - `SEED_DEMO_ON_STARTUP` = `true` (popula dados demonstrativos);
+   - `ADMIN_PASSWORD` = senha inicial.
+4. **Manual Deploy → Deploy latest commit** — no boot o app cria tabelas + admin +
+   dados de demonstração sozinho. Login com `admin` + a senha definida.
+
+> O Supabase **gratuito também tem o Session Pooler** (host
+> `aws-0-<região>.pooler.supabase.com`, IPv4) — o requisito "IPv4 = Pro" vale só
+> para a **conexão direta**. Tente o pooler antes de trocar de banco.
+
 ### Opção B — VPS / Docker
 
 ```dockerfile

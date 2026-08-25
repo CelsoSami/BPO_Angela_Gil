@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     # (executa database/seed.sql apenas quando a tabela de clientes está vazia).
     seed_demo_on_startup: bool = False
 
+    # Provisionamento automático: cria as tabelas (database/schema.sql) no 1º boot
+    # quando a tabela users não existe. Permite usar qualquer Postgres gratuito
+    # (ex.: Render Postgres free) sem Shell/SQL Editor. Desative em produção.
+    setup_schema_on_startup: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:

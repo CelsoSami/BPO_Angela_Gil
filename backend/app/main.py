@@ -37,6 +37,38 @@ logging.basicConfig(
 FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
 
 
+def _setup_schema_if_requested() -> None:
+    """Cria as tabelas no 1º boot quando SETUP_SCHEMA_ON_STARTUP=true
+    e a tabela `users` ainda não existe (permite Postgres sem provisioning)."""
+    if not settings.setup_schema_on_startup:
+        return
+    from sqlalchemy import text as sql_text
+
+    from app.database.session import get_session_local
+
+    try:
+        db = get_session_local()()
+    except Exception as exc:
+        logger.warning("Setup automático do schema ignorado: %s", exc)
+        return
+    try:
+        db.execute(sql_text("SELECT 1 FROM users LIMIT 1"))
+        db.commit()
+        return  # schema já existe
+    except Exception:
+        db.rollback()
+    try:
+        from app.services.seed import run_schema
+
+        n = run_schema(db)
+        logger.info("Schema criado automaticamente (%s statements).", n)
+    except Exception as exc:
+        db.rollback()
+        logger.error("Falha ao criar schema automaticamente: %s", exc)
+    finally:
+        db.close()
+
+
 def _bootstrap_admin() -> None:
     """Cria o primeiro administrador a partir do .env quando a tabela está vazia."""
     if not settings.admin_password:
@@ -102,6 +134,7 @@ def _seed_demo_if_requested() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
+    _setup_schema_if_requested()
     _bootstrap_admin()
     _seed_demo_if_requested()
     yield
