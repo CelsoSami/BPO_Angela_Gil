@@ -70,7 +70,10 @@ def _setup_schema_if_requested() -> None:
 
 
 def _bootstrap_admin() -> None:
-    """Cria o primeiro administrador a partir do .env quando a tabela está vazia."""
+    """Cria o primeiro administrador a partir do .env quando não existe.
+
+    Se o admin configurado já existir, sincroniza nome/e-mail do .env
+    (auto-correção — ex.: e-mail antigo com domínio reservado .local)."""
     if not settings.admin_password:
         return
     from app.database.session import get_session_local
@@ -83,11 +86,25 @@ def _bootstrap_admin() -> None:
         logger.warning("Bootstrap do admin ignorado: %s", exc)
         return
     try:
-        existe = db.query(User.id).first()
-        if existe:
+        username = settings.admin_username.strip()
+        admin = (
+            db.query(User).filter(User.username == username).first()
+        )
+        if admin is not None:
+            # auto-correção de dados do admin configurado
+            alterado = False
+            if admin.email != settings.admin_email:
+                admin.email = settings.admin_email
+                alterado = True
+            if admin.nome != settings.admin_name:
+                admin.nome = settings.admin_name
+                alterado = True
+            if alterado:
+                db.commit()
+                logger.info("Dados do administrador sincronizados com o .env.")
             return
         admin = User(
-            username=settings.admin_username.strip(),
+            username=username,
             nome=settings.admin_name,
             email=settings.admin_email,
             cargo="Administrador do sistema",

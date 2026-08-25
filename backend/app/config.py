@@ -29,7 +29,9 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str = ""
     admin_name: str = "Administrador"
-    admin_email: str = "admin@buildflow.local"
+    # Domínio real (.com) — o validador de e-mail rejeita domínios reservados
+    # como .local/.localhost/.test.
+    admin_email: str = "admin@buildflow.com"
 
     # CORS: lista separada por vírgula; "*" apenas em desenvolvimento
     cors_origins: str = "*"
