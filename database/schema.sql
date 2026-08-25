@@ -8,8 +8,8 @@
 -- Em produção avançada, pode-se habilitar RLS por role do banco.
 -- ============================================================================
 
--- Extensão para geração de UUIDs
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- UUIDs: gen_random_uuid() é nativo desde o PostgreSQL 13 — não é necessária
+-- a extensão pgcrypto (que poderia exigir permissões extras em hosts gerenciados).
 
 -- ============================================================================
 -- TRIGGER: updated_at automático
