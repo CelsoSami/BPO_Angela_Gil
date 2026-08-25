@@ -2,7 +2,6 @@
 import re
 from pathlib import Path
 
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent.parent  # build-flow/backend
@@ -35,13 +34,18 @@ def split_sql(texto: str) -> list[str]:
 
 
 def run_sql_file(db: Session, caminho: Path) -> int:
-    """Executa um arquivo .sql e retorna quantos statements foram aplicados."""
+    """Executa um arquivo .sql e retorna quantos statements foram aplicados.
+
+    Usa exec_driver_sql (SQL cru, sem parsing de binds do SQLAlchemy) para que
+    valores como JSON contendo ':140' não sejam interpretados como parâmetros.
+    """
     if not caminho.exists():
         raise FileNotFoundError(f"Arquivo SQL não encontrado: {caminho}")
     sql = caminho.read_text(encoding="utf-8")
+    conn = db.connection()
     n = 0
     for stmt in split_sql(sql):
-        db.execute(text(stmt))
+        conn.exec_driver_sql(stmt)
         n += 1
     db.commit()
     return n
