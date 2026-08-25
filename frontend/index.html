@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build Flow BPO — Gestão de Escritórios</title>
+  <meta name="description" content="Plataforma de BPO financeiro e administrativo para escritórios de arquitetura, engenharia e design de interiores." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234C7DFF'/%3E%3Cpath d='M8 24V10l8-4 8 4v14h-5v-8h-6v8z' fill='white'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/assets/css/app.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script defer src="/assets/js/api.js"></script>
+  <script defer src="/assets/js/ui.js"></script>
+  <script defer src="/assets/js/charts.js"></script>
+  <script defer src="/assets/js/app.js"></script>
+</head>
+<body>
+  <div id="app-root">
+    <!-- Login -->
+    <section id="view-login" class="login-wrap hidden">
+      <div class="login-brand">
+        <div class="login-brand-inner">
+          <div class="brand-mark lg">BF</div>
+          <h1>Build Flow <span>BPO</span></h1>
+          <p>Controle financeiro, organização administrativa e inteligência gerencial para escritórios de arquitetura, engenharia e design de interiores.</p>
+          <ul class="login-features">
+            <li>Fluxo de caixa, DRE e inadimplência</li>
+            <li>Contratos, projetos e rentabilidade</li>
+            <li>Central de documentos e coleta semanal</li>
+            <li>Dashboards e relatórios gerenciais</li>
+          </ul>
+        </div>
+      </div>
+      <div class="login-panel">
+        <form id="login-form" class="login-card glass" novalidate>
+          <div class="brand-mark">BF</div>
+          <h2>Acesso restrito</h2>
+          <p class="muted">Ambiente interno do BPO. Entre com suas credenciais.</p>
+          <label class="field">
+            <span>Usuário</span>
+            <input type="text" id="login-username" autocomplete="username" required placeholder="seu.usuario" />
+          </label>
+          <label class="field">
+            <span>Senha</span>
+            <input type="password" id="login-password" autocomplete="current-password" required placeholder="••••••••" />
+          </label>
+          <p id="login-error" class="form-error hidden"></p>
+          <button type="submit" class="btn btn-primary btn-block" id="login-btn">
+            Entrar
+          </button>
+        </form>
+        <p class="login-foot muted">© <span data-year></span> Build Flow BPO · Plataforma interna</p>
+      </div>
+    </section>
+
+    <!-- Aplicação -->
+    <section id="view-app" class="app-shell hidden">
+      <header class="topbar glass">
+        <button id="btn-sidebar-toggle" class="icon-btn" title="Recolher menu">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="topbar-title">
+          <span class="brand-mark sm">BF</span>
+          <strong>Build Flow BPO</strong>
+        </div>
+        <div class="topbar-actions">
+          <button id="btn-alerts" class="icon-btn" title="Alertas">
+            <svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-6 6v4l-2 3h16l-2-3V9a6 6 0 0 0-6-6Zm-2 15a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="badge-alerts" class="badge-dot hidden"></span>
+          </button>
+          <button id="btn-theme" class="icon-btn" title="Alternar tema">
+            <svg id="icon-theme" viewBox="0 0 24 24"></svg>
+          </button>
+          <div class="user-chip" id="user-chip">
+            <div class="avatar" id="user-avatar">?</div>
+            <div class="user-chip-info">
+              <strong id="user-name">—</strong>
+              <span id="user-role">—</span>
+            </div>
+          </div>
+          <button id="btn-logout" class="btn btn-ghost btn-sm">Sair</button>
+        </div>
+      </header>
+
+      <aside class="sidebar" id="sidebar">
+        <nav id="sidebar-nav" class="sidebar-nav"></nav>
+      </aside>
+
+      <main class="main" id="main">
+        <div id="page"></div>
+      </main>
+    </section>
+  </div>
+
+  <!-- Overlays -->
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <div id="loader-root"></div>
+</body>
+</html>
