@@ -38,18 +38,24 @@ def split_sql(texto: str) -> list[str]:
 def run_sql_file(db: Session, caminho: Path) -> int:
     """Executa um arquivo .sql e retorna quantos statements foram aplicados.
 
-    Usa exec_driver_sql (SQL cru, sem parsing de binds do SQLAlchemy) para que
-    valores como JSON contendo ':140' não sejam interpretados como parâmetros.
+    Usa a conexão bruta do driver (psycopg2) para executar o SQL sem a
+    maquinaria de binds do SQLAlchemy — assim valores como JSON com ':140'
+    ou operadores '%' não são interpretados como parâmetros.
     """
     if not caminho.exists():
         raise FileNotFoundError(f"Arquivo SQL não encontrado: {caminho}")
     sql = caminho.read_text(encoding="utf-8")
-    conn = db.connection()
+    raw = db.connection().connection  # conexão DBAPI (psycopg2)
+    cursor = raw.cursor()
     n = 0
-    for stmt in split_sql(sql):
-        conn.exec_driver_sql(stmt)
-        n += 1
-    db.commit()
+    try:
+        for stmt in split_sql(sql):
+            cursor.execute(stmt)
+            n += 1
+        db.commit()  # commit pela sessão para manter o estado do SQLAlchemy
+    except Exception:
+        db.rollback()
+        raise
     return n
 
 

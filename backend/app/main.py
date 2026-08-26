@@ -62,9 +62,9 @@ def _setup_schema_if_requested() -> None:
 
         n = run_schema(db)
         logger.info("Schema criado automaticamente (%s statements).", n)
-    except Exception as exc:
+    except Exception:
         db.rollback()
-        logger.error("Falha ao criar schema automaticamente: %s", exc)
+        logger.exception("Falha ao criar schema automaticamente")
     finally:
         db.close()
 
@@ -114,9 +114,9 @@ def _bootstrap_admin() -> None:
         db.add(admin)
         db.commit()
         logger.info("Administrador inicial criado: %s", admin.username)
-    except Exception as exc:
+    except Exception:
         db.rollback()
-        logger.error("Falha ao criar administrador inicial: %s", exc)
+        logger.exception("Falha ao criar administrador inicial")
     finally:
         db.close()
 
@@ -137,9 +137,9 @@ def _clean_demo_if_requested() -> None:
 
         run_demo_clean(db)
         logger.info("Dados de demonstração removidos.")
-    except Exception as exc:
+    except Exception:
         db.rollback()
-        logger.error("Falha ao limpar dados de demonstração: %s", exc)
+        logger.exception("Falha ao limpar dados de demonstração")
     finally:
         db.close()
 
@@ -178,9 +178,9 @@ def _seed_demo_if_requested() -> None:
                 logger.info("Dados estendidos de demonstração criados (%s statements).", n2)
             else:
                 logger.info("Dados estendidos já presentes (%s clientes).", atual)
-    except Exception as exc:
+    except Exception:
         db.rollback()
-        logger.error("Falha ao popular dados demonstrativos: %s", exc)
+        logger.exception("Falha ao popular dados demonstrativos")
     finally:
         db.close()
 
