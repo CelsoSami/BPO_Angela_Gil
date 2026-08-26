@@ -174,6 +174,28 @@ Perfis e permissões:
 
 ---
 
+## 9.1 Dados para apresentação (volume robusto)
+
+O projeto traz dois scripts SQL para demonstrar o poder da ferramenta com
+**milhares de registros fictícios** (últimos 12 meses):
+
+| Script | O que faz |
+|---|---|
+| `database/demo_generate.sql` | Gera ~50 escritórios, ~150 projetos, ~100 contratos, ~400 parcelas/recebíveis, ~2.400 contas a pagar, ~1.200 lançamentos de caixa, ~1.000 transações bancárias, documentos, alertas, saúde financeira, relatórios, coletas e ativos |
+| `database/demo_clean.sql` | Remove todos os dados de demonstração (recria referências no próximo boot; o usuário admin é mantido) |
+
+**No Render (Recomendado — sem SQL Editor):** defina no painel do serviço:
+- `DEMO_EXTENDED=true` → o app executa o gerador automaticamente no próximo boot (quando houver poucos clientes);
+- `DEMO_CLEAN_ON_STARTUP=true` → o app limpa os dados no boot (volte para `false` após limpar).
+
+**Em qualquer banco (Supabase/Render/Neon):** execute os scripts no SQL Editor,
+sempre `demo_clean.sql` antes de `demo_generate.sql` para reexecutar sem duplicar.
+
+> Ordem no boot do app: schema → (limpeza, se pedida) → admin → seed básico →
+> gerador estendido (se `DEMO_EXTENDED=true`).
+
+---
+
 ## 10. Publicação (deploy)
 
 > **Recomendado: Render (grátis) + Supabase.** O GitHub Pages NÃO serve esta

@@ -19,9 +19,14 @@
     if (btn) btn.addEventListener("click", () => {
       const atual = document.documentElement.getAttribute("data-theme");
       applyTheme(atual === "dark" ? "light" : "dark");
-      // regrava gráficos da página atual
-      const evt = new CustomEvent("bf:theme-change");
-      document.dispatchEvent(evt);
+      document.dispatchEvent(new CustomEvent("bf:theme-change"));
+    });
+    // Ao trocar o tema, redesenha a ABA ATUAL (mantém a página em que o
+    // usuário está; os gráficos são recriados com as cores do novo tema).
+    document.addEventListener("bf:theme-change", () => {
+      if (currentUser() && !document.getElementById("view-login").classList.contains("hidden")) {
+        router();
+      }
     });
   }
 

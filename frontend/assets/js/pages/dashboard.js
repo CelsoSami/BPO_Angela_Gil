@@ -142,11 +142,6 @@
     };
     rank(data.rankings.mais_rentaveis || [], "box-mais", (m) => (m >= 15 ? "positive" : "negative"));
     rank(data.rankings.menos_rentaveis || [], "box-menos", () => "negative");
-
-    document.addEventListener("bf:theme-change", () => {
-      // redesenha ao trocar tema
-      overview(container).catch(console.error);
-    }, { once: true });
   }
 
   window.Pages.dashboard = { overview };

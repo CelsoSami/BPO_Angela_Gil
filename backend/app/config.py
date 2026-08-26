@@ -57,6 +57,14 @@ class Settings(BaseSettings):
     # (ex.: Render Postgres free) sem Shell/SQL Editor. Desative em produção.
     setup_schema_on_startup: bool = False
 
+    # Dados estendidos para apresentação: após o seed básico, executa
+    # database/demo_generate.sql quando há poucos clientes (< 40).
+    demo_extended: bool = False
+
+    # Limpa os dados de demonstração no boot (database/demo_clean.sql) —
+    # mantém usuários/planos/categorias. Use com cuidado: TRUE apaga dados.
+    demo_clean_on_startup: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:

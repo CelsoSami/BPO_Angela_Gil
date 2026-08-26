@@ -8,6 +8,8 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent.parent  # build-flow/backen
 DATABASE_DIR = BACKEND_DIR.parent / "database"
 SCHEMA_PATH = DATABASE_DIR / "schema.sql"
 SEED_PATH = DATABASE_DIR / "seed.sql"
+DEMO_GENERATE_PATH = DATABASE_DIR / "demo_generate.sql"
+DEMO_CLEAN_PATH = DATABASE_DIR / "demo_clean.sql"
 
 # Padrão de dollar-quoting do PostgreSQL: $$ ... $$ ou $tag$ ... $tag$
 _DOLLAR_QUOTE = re.compile(r"\$[A-Za-z_][A-Za-z0-9_]*\$|\$\$")
@@ -59,3 +61,13 @@ def run_seed(db: Session, caminho: Path | None = None) -> int:
 def run_schema(db: Session, caminho: Path | None = None) -> int:
     """Executa o schema.sql (criação de tabelas). Retorna nº de statements."""
     return run_sql_file(db, caminho or SCHEMA_PATH)
+
+
+def run_demo_generate(db: Session, caminho: Path | None = None) -> int:
+    """Executa o gerador de dados estendido (demo_generate.sql)."""
+    return run_sql_file(db, caminho or DEMO_GENERATE_PATH)
+
+
+def run_demo_clean(db: Session, caminho: Path | None = None) -> int:
+    """Executa a limpeza dos dados de demonstração (demo_clean.sql)."""
+    return run_sql_file(db, caminho or DEMO_CLEAN_PATH)

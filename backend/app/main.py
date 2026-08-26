@@ -121,10 +121,38 @@ def _bootstrap_admin() -> None:
         db.close()
 
 
+def _clean_demo_if_requested() -> None:
+    """Remove os dados de demonstração no boot quando DEMO_CLEAN_ON_STARTUP=true."""
+    if not settings.demo_clean_on_startup:
+        return
+    from app.database.session import get_session_local
+
+    try:
+        db = get_session_local()()
+    except Exception as exc:
+        logger.warning("Limpeza de demonstração ignorada: %s", exc)
+        return
+    try:
+        from app.services.seed import run_demo_clean
+
+        run_demo_clean(db)
+        logger.info("Dados de demonstração removidos.")
+    except Exception as exc:
+        db.rollback()
+        logger.error("Falha ao limpar dados de demonstração: %s", exc)
+    finally:
+        db.close()
+
+
 def _seed_demo_if_requested() -> None:
-    """Popula dados demonstrativos no 1º boot quando SEED_DEMO_ON_STARTUP=true."""
+    """Popula dados demonstrativos no boot quando SEED_DEMO_ON_STARTUP=true.
+
+    Executa o seed básico (banco vazio) e, se DEMO_EXTENDED=true e houver
+    poucos clientes, o gerador estendido (demo_generate.sql)."""
     if not settings.seed_demo_on_startup:
         return
+    from sqlalchemy import func
+
     from app.database.session import get_session_local
     from app.models.clients import Client
 
@@ -134,13 +162,22 @@ def _seed_demo_if_requested() -> None:
         logger.warning("Seed de demonstração ignorado: %s", exc)
         return
     try:
-        existe = db.query(Client.id).first()
-        if existe:
-            return
-        from app.services.seed import run_seed
+        total = db.query(func.count(Client.id)).scalar() or 0
+        if total == 0:
+            from app.services.seed import run_seed
 
-        n = run_seed(db)
-        logger.info("Dados demonstrativos criados (%s statements).", n)
+            n = run_seed(db)
+            logger.info("Dados demonstrativos criados (%s statements).", n)
+
+        if settings.demo_extended:
+            from app.services.seed import run_demo_generate
+
+            atual = db.query(func.count(Client.id)).scalar() or 0
+            if atual < 40:
+                n2 = run_demo_generate(db)
+                logger.info("Dados estendidos de demonstração criados (%s statements).", n2)
+            else:
+                logger.info("Dados estendidos já presentes (%s clientes).", atual)
     except Exception as exc:
         db.rollback()
         logger.error("Falha ao popular dados demonstrativos: %s", exc)
@@ -152,6 +189,7 @@ def _seed_demo_if_requested() -> None:
 async def lifespan(app: FastAPI):
     Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
     _setup_schema_if_requested()
+    _clean_demo_if_requested()
     _bootstrap_admin()
     _seed_demo_if_requested()
     yield

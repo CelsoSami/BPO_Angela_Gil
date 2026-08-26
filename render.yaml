@@ -42,6 +42,14 @@ services:
       # (permite usar o Render Postgres free ou qualquer Postgres sem SQL Editor).
       - key: SETUP_SCHEMA_ON_STARTUP
         value: true
+      # Dados estendidos para apresentação: gera dezenas de escritórios,
+      # projetos, contratos e movimentação financeira (demo_generate.sql).
+      - key: DEMO_EXTENDED
+        value: true
+      # Limpeza automática dos dados de demonstração no boot (use com cuidado):
+      # coloque true, faça o deploy, e volte para false após limpar.
+      - key: DEMO_CLEAN_ON_STARTUP
+        value: false
       # Gera um SECRET_KEY aleatório automaticamente no primeiro deploy
       - key: SECRET_KEY
         generateValue: true
